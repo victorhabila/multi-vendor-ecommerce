@@ -1,6 +1,5 @@
 package com.multi_vendo_ecom.ecommerce.multivendor.config;
 
-import jakarta.persistence.Id;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -31,13 +30,13 @@ public class AppConfig {
                         .anyRequest().permitAll()
                 ).addFilterBefore(new JwtTokenValidator(), BasicAuthenticationFilter.class)
                 .csrf(csrf -> csrf.disable())
-                .cors(cors -> cors.configurationSource(corsCofigurationSource()));
+                .cors(cors -> cors.configurationSource(corsConfigurationSource()));
 
         return http.build();
     }
 
 
-    private CorsConfigurationSource corsCofigurationSource() {
+    private CorsConfigurationSource corsConfigurationSource() {
         return new CorsConfigurationSource() {
             @Override
             public CorsConfiguration getCorsConfiguration(HttpServletRequest request) {
@@ -50,19 +49,21 @@ public class AppConfig {
                 cfg.setMaxAge(3600L);
                 return cfg;
             }
-            //This method will be used to encode our password
-            @Bean
-            PasswordEncoder passwordEncoder(){
-                return new BCryptPasswordEncoder();
-
-            }
-
-            // for communicating with external services, we need a rest template
-            @Bean
-            public RestTemplate restTemplate(){
-                return new RestTemplate();
-            }
 
         };
     }
+
+    //This method will be used to encode our password
+    @Bean
+    PasswordEncoder passwordEncoder(){
+        return new BCryptPasswordEncoder();
+
+    }
+
+    // for communicating with external services, we need a rest template
+    @Bean
+    public RestTemplate restTemplate(){
+        return new RestTemplate();
+    }
+
 }

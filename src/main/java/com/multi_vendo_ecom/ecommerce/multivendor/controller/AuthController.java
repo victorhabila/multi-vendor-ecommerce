@@ -1,9 +1,11 @@
 package com.multi_vendo_ecom.ecommerce.multivendor.controller;
 
+import com.multi_vendo_ecom.ecommerce.multivendor.domain.USER_ROLE;
 import com.multi_vendo_ecom.ecommerce.multivendor.model.User;
 import com.multi_vendo_ecom.ecommerce.multivendor.repository.UserRepository;
+import com.multi_vendo_ecom.ecommerce.multivendor.response.AuthResponse;
 import com.multi_vendo_ecom.ecommerce.multivendor.response.SignupRequest;
-import lombok.RequiredArgsConstructor;
+import com.multi_vendo_ecom.ecommerce.multivendor.service.AuthService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -16,16 +18,21 @@ import org.springframework.web.bind.annotation.RestController;
 public class AuthController {
 
     private final UserRepository userRepository;
+    private final AuthService authService;
 
-    public AuthController(UserRepository userRepository) {
+    public AuthController(UserRepository userRepository, AuthService authService) {
         this.userRepository = userRepository;
+        this.authService = authService;
     }
 
     @PostMapping("/signup")
-    public ResponseEntity<User> createUserHandler(@RequestBody SignupRequest req){
-        User user = new User();
-        user.setEmail(req.getEmail());
-        user.setFullName(req.getFullName());
-        return  new ResponseEntity( userRepository.save(user), HttpStatus.CREATED);
+    public ResponseEntity<AuthResponse> createUserHandler(@RequestBody SignupRequest req){
+        String jwt = authService.createUser(req);
+
+        AuthResponse res = new AuthResponse();
+        res.setJwt(jwt);
+        res.setMessage("User created successfully");
+        res.setRole(USER_ROLE.ROLE_CUSTOMER);
+        return ResponseEntity.ok(res);
     }
 }
