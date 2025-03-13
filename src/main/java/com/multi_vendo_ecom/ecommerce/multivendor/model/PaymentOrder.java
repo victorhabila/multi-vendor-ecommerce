@@ -32,7 +32,7 @@ public class PaymentOrder {
     @ManyToOne
     private User user;
 
-    @OneToMany
+    @OneToMany //a user can decide to buy paint and bags from separate sellers or brands. This will require two or more orders created for paint and bags
     private Set<Order> orders = new HashSet<>();
 
 }
