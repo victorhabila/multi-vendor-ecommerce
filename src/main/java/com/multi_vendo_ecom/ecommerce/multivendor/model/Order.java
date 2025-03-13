@@ -15,6 +15,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode // because of the SET collection
+@Table(name = "Orders")
 public class Order {
 
     @Id

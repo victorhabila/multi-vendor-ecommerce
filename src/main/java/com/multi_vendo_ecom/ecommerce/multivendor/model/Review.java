@@ -30,11 +30,9 @@ public class Review {
 
     @JsonIgnore
     @ManyToOne
-    @Column(nullable = false)
     private Product product;
 
     @ManyToOne
-    @Column(nullable = false)// this nis optional because the database will do that automatically. it your choice
     private User user;
 
     private LocalDateTime createdAt = LocalDateTime.now();
