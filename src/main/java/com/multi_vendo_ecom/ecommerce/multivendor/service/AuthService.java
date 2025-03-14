@@ -4,5 +4,8 @@ import com.multi_vendo_ecom.ecommerce.multivendor.response.SignupRequest;
 
 public interface AuthService {
 
-    String createUser(SignupRequest req);
+    void sentLoginAndSignUpOtp(String email) throws Exception;
+    String createUser(SignupRequest req) throws Exception;
+
+
 }
