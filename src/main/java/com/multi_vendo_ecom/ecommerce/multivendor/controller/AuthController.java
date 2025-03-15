@@ -4,6 +4,7 @@ import com.multi_vendo_ecom.ecommerce.multivendor.domain.USER_ROLE;
 import com.multi_vendo_ecom.ecommerce.multivendor.model.User;
 import com.multi_vendo_ecom.ecommerce.multivendor.model.VerificationCode;
 import com.multi_vendo_ecom.ecommerce.multivendor.repository.UserRepository;
+import com.multi_vendo_ecom.ecommerce.multivendor.request.LoginRequest;
 import com.multi_vendo_ecom.ecommerce.multivendor.response.ApiResponse;
 import com.multi_vendo_ecom.ecommerce.multivendor.response.AuthResponse;
 import com.multi_vendo_ecom.ecommerce.multivendor.response.SignupRequest;
@@ -44,5 +45,11 @@ public class AuthController {
         ApiResponse res = new ApiResponse();
         res.setMessage("otp sent successfully");
         return ResponseEntity.ok(res);
+    }
+
+    @PostMapping("/signin")
+    public ResponseEntity<AuthResponse> loginHandler(@RequestBody LoginRequest req) throws Exception {
+        AuthResponse authResponse= authService.signin(req);
+        return ResponseEntity.ok(authResponse);
     }
 }

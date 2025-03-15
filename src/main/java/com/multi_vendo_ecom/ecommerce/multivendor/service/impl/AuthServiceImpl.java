@@ -8,19 +8,24 @@ import com.multi_vendo_ecom.ecommerce.multivendor.model.VerificationCode;
 import com.multi_vendo_ecom.ecommerce.multivendor.repository.CartRepository;
 import com.multi_vendo_ecom.ecommerce.multivendor.repository.UserRepository;
 import com.multi_vendo_ecom.ecommerce.multivendor.repository.VerificationCodeRepository;
+import com.multi_vendo_ecom.ecommerce.multivendor.request.LoginRequest;
+import com.multi_vendo_ecom.ecommerce.multivendor.response.AuthResponse;
 import com.multi_vendo_ecom.ecommerce.multivendor.response.SignupRequest;
 import com.multi_vendo_ecom.ecommerce.multivendor.service.AuthService;
 import com.multi_vendo_ecom.ecommerce.multivendor.service.EmailService;
 import com.multi_vendo_ecom.ecommerce.multivendor.utils.OtpUtil;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 @Service
@@ -35,14 +40,17 @@ public class AuthServiceImpl implements AuthService {
 
     private final EmailService emailService;
 
+    private final CustomUserServiceImpl customUserService;
+
     // Manually define the constructor
-    public AuthServiceImpl(UserRepository userRepository, PasswordEncoder passwordEncoder, CartRepository cartRepository, JwtProvider jwtProvider, VerificationCodeRepository verificationCodeRepository, EmailService emailService) {
+    public AuthServiceImpl(UserRepository userRepository, PasswordEncoder passwordEncoder, CartRepository cartRepository, JwtProvider jwtProvider, VerificationCodeRepository verificationCodeRepository, EmailService emailService, CustomUserServiceImpl customUserService) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.cartRepository = cartRepository;
         this.jwtProvider = jwtProvider;
         this.verificationCodeRepository = verificationCodeRepository;
         this.emailService = emailService;
+        this.customUserService = customUserService;
     }
 
 
@@ -110,5 +118,39 @@ public class AuthServiceImpl implements AuthService {
         Authentication authentication = new UsernamePasswordAuthenticationToken(req.getEmail(), null, authorities);
         SecurityContextHolder.getContext().setAuthentication(authentication);
         return jwtProvider.generateToken(authentication);
+    }
+
+    @Override
+    public AuthResponse signin(LoginRequest req) {
+       String username = req.getEmail();
+       String otp = req.getOtp();
+
+       Authentication authentication = authenticate(username, otp);
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+        String token = jwtProvider.generateToken(authentication);
+
+        AuthResponse authResponse = new AuthResponse();
+        authResponse.setJwt(token);
+        authResponse.setMessage("Login success");
+
+        Collection<? extends  GrantedAuthority> authorities = authentication.getAuthorities();
+        String roleName=authorities.isEmpty()?null:authorities.iterator().next().getAuthority();
+
+        authResponse.setRole(USER_ROLE.valueOf(roleName));
+       return authResponse;
+    }
+
+    private Authentication authenticate(String username, String otp) {
+       UserDetails userDetails=  customUserService.loadUserByUsername(username);
+
+       if(userDetails == null){
+           throw new BadCredentialsException("invalid username");
+       }
+       VerificationCode verificationCode = verificationCodeRepository.findByEmail(username);
+
+       if(verificationCode == null || !verificationCode.getOtp().equals(otp)){
+           throw new BadCredentialsException("wrong otp");
+       }
+        return new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
     }
 }
