@@ -3,6 +3,7 @@ package com.multi_vendo_ecom.ecommerce.multivendor.service.impl;
 import com.multi_vendo_ecom.ecommerce.multivendor.config.JwtProvider;
 import com.multi_vendo_ecom.ecommerce.multivendor.domain.AccountStatus;
 import com.multi_vendo_ecom.ecommerce.multivendor.domain.USER_ROLE;
+import com.multi_vendo_ecom.ecommerce.multivendor.exceptions.SellerException;
 import com.multi_vendo_ecom.ecommerce.multivendor.model.Address;
 import com.multi_vendo_ecom.ecommerce.multivendor.model.Seller;
 import com.multi_vendo_ecom.ecommerce.multivendor.repository.AddressRepository;
@@ -60,8 +61,8 @@ public class SellerServiceImpl implements SellerService {
     }
 
     @Override
-    public Seller getSellerById(Long id) throws Exception {
-        return sellerRepository.findById(id).orElseThrow(()-> new Exception("seller not found with id " + id));
+    public Seller getSellerById(Long id) throws SellerException {
+        return sellerRepository.findById(id).orElseThrow(()-> new SellerException("seller not found with id " + id));
     }
 
     @Override

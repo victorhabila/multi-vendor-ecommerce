@@ -2,6 +2,7 @@ package com.multi_vendo_ecom.ecommerce.multivendor.controller;
 
 import com.multi_vendo_ecom.ecommerce.multivendor.config.JwtProvider;
 import com.multi_vendo_ecom.ecommerce.multivendor.domain.AccountStatus;
+import com.multi_vendo_ecom.ecommerce.multivendor.exceptions.SellerException;
 import com.multi_vendo_ecom.ecommerce.multivendor.model.Seller;
 import com.multi_vendo_ecom.ecommerce.multivendor.model.SellerReport;
 import com.multi_vendo_ecom.ecommerce.multivendor.model.VerificationCode;
@@ -87,7 +88,7 @@ public class SellerController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Seller> getSellerById(@PathVariable Long id) throws Exception {
+    public ResponseEntity<Seller> getSellerById(@PathVariable Long id) throws SellerException {
 
         Seller seller = sellerService.getSellerById(id);
         return new ResponseEntity<>(seller, HttpStatus.OK);
