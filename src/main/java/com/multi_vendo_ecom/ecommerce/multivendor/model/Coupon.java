@@ -31,6 +31,6 @@ public class Coupon {
 
     private boolean isActive = true;
 
-    @ManyToMany(mappedBy = "usedCoupons") // this mean that the database will not create extra table for this rather it goes to usedCoupons table and map there.
+    @ManyToMany(mappedBy = "usedCoupons") // this mean that the database will not create extra table for this rather it goes to users table and map there using usedCoupons.
     private Set<User> usedByUsers = new HashSet<>();
 }

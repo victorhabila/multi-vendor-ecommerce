@@ -6,6 +6,7 @@ import lombok.Data;
 public class LoginRequest {
 
     private String email;
+    private String otp;
 
     public String getEmail() {
         return email;
@@ -23,5 +24,5 @@ public class LoginRequest {
         this.otp = otp;
     }
 
-    private String otp;
+
 }

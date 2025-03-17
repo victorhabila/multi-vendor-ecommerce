@@ -25,7 +25,7 @@ public class Review {
     @Column(nullable = false)
     private double rating;
 
-    @ElementCollection
+    @ElementCollection // because now latest ecommerce platforms add screenshots or pictures of products they are reviewing
     private List<String> productImages;
 
     @JsonIgnore

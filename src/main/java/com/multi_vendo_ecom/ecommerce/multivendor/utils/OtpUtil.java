@@ -6,13 +6,13 @@ public class OtpUtil {
 
     public static String generatedOtp(){
 
-        int otpLenth = 6;
+        int otpLength = 6;
 
         Random random = new Random();
 
-        StringBuilder otp = new StringBuilder(otpLenth);
+        StringBuilder otp = new StringBuilder(otpLength);
 
-        for(int i =0; i<otpLenth; i++){
+        for(int i =0; i<otpLength; i++){
             otp.append(random.nextInt(10));
         }
 
