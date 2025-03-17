@@ -3,9 +3,11 @@ package com.multi_vendo_ecom.ecommerce.multivendor.service.impl;
 import com.multi_vendo_ecom.ecommerce.multivendor.config.JwtProvider;
 import com.multi_vendo_ecom.ecommerce.multivendor.domain.USER_ROLE;
 import com.multi_vendo_ecom.ecommerce.multivendor.model.Cart;
+import com.multi_vendo_ecom.ecommerce.multivendor.model.Seller;
 import com.multi_vendo_ecom.ecommerce.multivendor.model.User;
 import com.multi_vendo_ecom.ecommerce.multivendor.model.VerificationCode;
 import com.multi_vendo_ecom.ecommerce.multivendor.repository.CartRepository;
+import com.multi_vendo_ecom.ecommerce.multivendor.repository.SellerRepository;
 import com.multi_vendo_ecom.ecommerce.multivendor.repository.UserRepository;
 import com.multi_vendo_ecom.ecommerce.multivendor.repository.VerificationCodeRepository;
 import com.multi_vendo_ecom.ecommerce.multivendor.request.LoginRequest;
@@ -42,8 +44,10 @@ public class AuthServiceImpl implements AuthService {
 
     private final CustomUserServiceImpl customUserService;
 
+    private final SellerRepository sellerRepository;
+
     // Manually define the constructor
-    public AuthServiceImpl(UserRepository userRepository, PasswordEncoder passwordEncoder, CartRepository cartRepository, JwtProvider jwtProvider, VerificationCodeRepository verificationCodeRepository, EmailService emailService, CustomUserServiceImpl customUserService) {
+    public AuthServiceImpl(UserRepository userRepository, PasswordEncoder passwordEncoder, CartRepository cartRepository, JwtProvider jwtProvider, VerificationCodeRepository verificationCodeRepository, EmailService emailService, CustomUserServiceImpl customUserService, SellerRepository sellerRepository) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.cartRepository = cartRepository;
@@ -51,21 +55,35 @@ public class AuthServiceImpl implements AuthService {
         this.verificationCodeRepository = verificationCodeRepository;
         this.emailService = emailService;
         this.customUserService = customUserService;
+        this.sellerRepository = sellerRepository;
     }
 
 
     @Override
-    public void sentLoginAndSignUpOtp(String email) throws Exception {
+    public void sentLoginAndSignUpOtp(String email, USER_ROLE role) throws Exception {
 
-        String SIGNING_PREFIX="signin_";
+        String SIGNING_PREFIX = "signin_";
 
         if(email.startsWith(SIGNING_PREFIX)){
             email = email.substring(SIGNING_PREFIX.length());
 
-            User user = userRepository.findByEmail(email);
-            if(user == null){
-                throw new Exception("User not exist with provided email");
+            //let check if role is customer, signing as customer else signing as seller
+            if(role.equals(USER_ROLE.ROLE_SELLER)){
+
+                Seller seller = sellerRepository.findByEmail(email);
+                if(seller == null){
+                    throw new Exception ("seller not found ...");
+                }
+
             }
+            else{
+                User user = userRepository.findByEmail(email);
+                if(user == null){
+                    throw new Exception("User not exist with provided email");
+                }
+            }
+
+
         }
 
         VerificationCode isExist = verificationCodeRepository.findByEmail(email);
@@ -121,7 +139,7 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public AuthResponse signin(LoginRequest req) {
+    public AuthResponse signin(LoginRequest req) throws Exception {
        String username = req.getEmail();
        String otp = req.getOtp();
 
@@ -140,8 +158,15 @@ public class AuthServiceImpl implements AuthService {
        return authResponse;
     }
 
-    private Authentication authenticate(String username, String otp) {
+    private Authentication authenticate(String username, String otp) throws Exception {
        UserDetails userDetails=  customUserService.loadUserByUsername(username);
+       //note our email has the seller_prefix. We need to extract only email and use it for verification
+        String SELLER_PREFIX="seller_";
+        if(username.startsWith(SELLER_PREFIX)){
+
+            username= username.substring(SELLER_PREFIX.length());
+
+        }
 
        if(userDetails == null){
            throw new BadCredentialsException("invalid username");
@@ -149,7 +174,7 @@ public class AuthServiceImpl implements AuthService {
        VerificationCode verificationCode = verificationCodeRepository.findByEmail(username);
 
        if(verificationCode == null || !verificationCode.getOtp().equals(otp)){
-           throw new BadCredentialsException("wrong otp");
+           throw new Exception("wrong otp");
        }
         return new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
     }
