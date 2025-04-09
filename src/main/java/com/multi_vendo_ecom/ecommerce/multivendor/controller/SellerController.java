@@ -11,6 +11,7 @@ import com.multi_vendo_ecom.ecommerce.multivendor.request.LoginRequest;
 import com.multi_vendo_ecom.ecommerce.multivendor.response.AuthResponse;
 import com.multi_vendo_ecom.ecommerce.multivendor.service.AuthService;
 import com.multi_vendo_ecom.ecommerce.multivendor.service.EmailService;
+import com.multi_vendo_ecom.ecommerce.multivendor.service.SellerReportService;
 import com.multi_vendo_ecom.ecommerce.multivendor.service.SellerService;
 import com.multi_vendo_ecom.ecommerce.multivendor.utils.OtpUtil;
 import org.springframework.http.HttpStatus;
@@ -27,13 +28,16 @@ public class SellerController {
     private final VerificationCodeRepository verificationCodeRepository;
     private final AuthService authService;
 
+    private final SellerReportService sellerReportService;
+
     private final EmailService emailService;
     private final JwtProvider jwtProvider;
 
-    public SellerController(SellerService sellerService, VerificationCodeRepository verificationCodeRepository, AuthService authService, EmailService emailService, JwtProvider jwtProvider) {
+    public SellerController(SellerService sellerService, VerificationCodeRepository verificationCodeRepository, AuthService authService, SellerReportService sellerReportService, EmailService emailService, JwtProvider jwtProvider) {
         this.sellerService = sellerService;
         this.verificationCodeRepository = verificationCodeRepository;
         this.authService = authService;
+        this.sellerReportService = sellerReportService;
         this.emailService = emailService;
         this.jwtProvider = jwtProvider;
     }
@@ -102,17 +106,17 @@ public class SellerController {
 
     }
 
-//    @GetMapping("/report")
-//    public ResponseEntity<SellerReport> getAllReport(@RequestHeader("Authorization") String jwt) throws Exception {
-//
-//        String email = jwtProvider.getEmailFromJwtToken(jwt);
-//        Seller seller = sellerService.getSellerByEmail(email);
-//
-//        SellerReport report = sellerReportService.getSellerReport(seller);
-//
-//        return new ResponseEntity<>(report, HttpStatus.OK);
-//
-//    }
+    @GetMapping("/report")
+    public ResponseEntity<SellerReport> getAllReport(@RequestHeader("Authorization") String jwt) throws Exception {
+
+       // String email = jwtProvider.getEmailFromJwtToken(jwt);
+        Seller seller = sellerService.getSellerByEmail(jwt);
+
+        SellerReport report = sellerReportService.getSellerReport(seller);
+
+        return new ResponseEntity<>(report, HttpStatus.OK);
+
+    }
 
 
     @GetMapping()
