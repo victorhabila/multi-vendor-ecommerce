@@ -40,7 +40,7 @@ public class CouponServiceImpl implements CouponService {
             throw new Exception("Only valid for minimum order value" + coupon.getMinimumOrderValue());
         }
 
-        if(coupon.isActive() && LocalDate.now().isAfter(coupon.getValidityEndDate()) && LocalDate.now().isBefore(coupon.getValidityEndDate()))
+        if(coupon.isActive() && LocalDate.now().isAfter(coupon.getValidityStartDate()) && LocalDate.now().isBefore(coupon.getValidityEndDate()))
         {
             user.getUsedCoupons().add(coupon);
             userRepository.save(user);
