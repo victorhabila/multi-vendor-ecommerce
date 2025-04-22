@@ -42,4 +42,13 @@ public class Deal {
     public void setCategory(HomeCategory category) {
         this.category = category;
     }
+
+    public Deal() {
+    }
+
+    public Deal(Long id, Integer discount, HomeCategory category) {
+        this.id = id;
+        this.discount = discount;
+        this.category = category;
+    }
 }
